@@ -1,22 +1,22 @@
 # agent-team
 
-一個可重複使用的 Claude 開發團隊**專案模板**。把 5 個角色定義成 Claude Code 的 **subagents**，Claude 以 Tech Lead 身份依任務類型自主委派，每個角色留下各自的紀錄供未來參考。
+一個可重複使用的多代理人開發團隊**專案模板**。本專案同時支援 **Claude Code** 與 **Antigravity (`agy`) / 通用 Agent**（基於 `AGENTS.md` 標準）。你可以透過 Tech Lead 角色自主委派 5 個子代理人角色，並留下各自的執行紀錄。
 
 ---
 
 ## 團隊結構
 
 ```
-Claude（Tech Lead / 協調者）
+AI（Tech Lead / 協調者）
 │
-├── architect     ← 只在新功能 / 重構時啟動；邊界爭議的仲裁者（model: opus）
-├── backend       ← 實作核心邏輯與共用 API client，收到真實錯誤後修改（model: sonnet）
-├── frontend      ← 實作 UI 層，可呼叫既有 client，收到真實錯誤後修改（model: sonnet）
-├── tester        ← 撰寫並實際執行測試，找邊界案例（model: sonnet）
-└── reviewer      ← 直接修改問題並重跑測試，留下修改紀錄（model: opus）
+├── architect     ← 只在新功能 / 重構時啟動；邊界爭議的仲裁者
+├── backend       ← 實作核心邏輯與共用 API client，收到真實錯誤後修改
+├── frontend      ← 實作 UI 層，可呼叫既有 client，收到真實錯誤後修改
+├── tester        ← 撰寫並實際執行測試，找邊界案例
+└── reviewer      ← 直接修改問題並重跑測試，留下修改紀錄
 ```
 
-各角色是真正的 subagent（`.claude/agents/`），有獨立 context、各自的工具與模型。
+在 Claude Code 中使用 `.claude/agents/` 定義角色；在 Antigravity (`agy`) / 通用 Agent 中使用 `.agents/skills/` 定義角色。
 
 ## 派工規則
 
@@ -62,23 +62,22 @@ rm -rf .git && git init            # 清掉模板歷史，開全新專案
 git remote add origin <你的新 repo>
 ```
 
-clone 下來的 `.claude/agents/` 正好落在專案根，Claude Code 一開工就自動發現；
-根目錄 `CLAUDE.md` 上半部是協調規則（沿用），下半部留白給你填專案專屬規則。
+* **對於 Claude Code**：專案根目錄的 `CLAUDE.md` 及 `.claude/agents/` 設定會自動被載入。
+* **對於 Antigravity (`agy`) / 通用 Agent**：專案根目錄的 `AGENTS.md` 規格，以及 `.agents/rules/` 與 `.agents/skills/` 設定會被自動發現。
 
-`.claude/settings.json` 內建一份泛用的權限白名單（測試 / 建置 / lint / 唯讀 git），
-讓流水線不會被權限提示打斷；`git commit`、`git push`、部署類指令刻意不放行，維持人工把關。
-在實際專案跑一陣子後，可用 `/fewer-permission-prompts` 依真實使用紀錄微調。
+`CLAUDE.md` 與 `AGENTS.md` 的上半部為協調規則，下半部留白供填入專案專屬規則。
+
+同時，我們保留了 `.claude/settings.json` 的權限白名單以避免 Claude Code 頻繁提示。兩套工具的執行紀錄與決策歷程**均會統一寫入 `.claude/logs/`**，實現完美的團隊共享記憶。
 
 ---
 
 ## 使用方式
 
-直接跟 Claude 描述任務，Tech Lead 會自主委派對應角色：
+直接向 AI（Tech Lead）描述您的任務，它會自主依序委派角色：
 
 > 「幫我實作 guard.ts，確保非測試店無法送單」
 
-Claude 判斷類型後，依序委派 backend → tester → reviewer，
-每個角色完成後把紀錄寫入 `.claude/logs/{role}.md`。
+Tech Lead 判斷任務類型後，會依序委派 backend → tester → reviewer，每個角色完成後會把紀錄附加至 `.claude/logs/{role}.md`。
 
 ---
 
@@ -86,20 +85,24 @@ Claude 判斷類型後，依序委派 backend → tester → reviewer，
 
 ```
 agent-team/
-├── CLAUDE.md              ← 協調規則 + 專案規則留白
+├── CLAUDE.md              ← Claude Code 協調與專案規則
+├── AGENTS.md              ← Tool-agnostic/Antigravity 協調與專案規則
 ├── README.md
 ├── .gitignore
 ├── docs/
 │   └── design-discussion-2026-07-03.md   ← 團隊設計的討論與決策紀錄
-└── .claude/
+├── .agents/               ← Antigravity / 通用 Agent 設定
+│   ├── rules/             ← 常駐規則（tech-lead.md 等）
+│   └── skills/            ← 5 個角色 Skill 定義（含 SKILL.md）
+└── .claude/               ← Claude Code 設定及團隊日誌
     ├── settings.json     ← 泛用權限白名單
-    ├── agents/           ← 5 個 subagent 定義（含 frontmatter）
+    ├── agents/           ← 5 個 subagent 定義
     │   ├── architect.md
     │   ├── backend.md
     │   ├── frontend.md
     │   ├── tester.md
     │   └── reviewer.md
-    └── logs/             ← 團隊共享記憶（各角色紀錄 + 跨角色共識）
+    └── logs/             ← 團隊共享記憶（各角色紀錄 + 跨角色共識，Claude Code 與 agy 共用）
         ├── architect.md
         ├── backend.md
         ├── frontend.md
