@@ -35,6 +35,10 @@
 | tester | 把驗收條件轉成可執行測試，覆蓋紅線與邊界 | — |
 | reviewer | 最終把關：紅線、規格忠實度、一致性，直接修正 | — |
 
+各角色依工作性質分級指定模型（agent frontmatter `model:` 欄位，用別名以免模型改版逐檔改）：
+判斷重、代價高的 **product-manager / architect / reviewer 走 `opus`**（需求仲裁、架構決策、安全把關）；
+實作與規則性的 **backend / frontend / tester / ui-designer 走 `sonnet`**。品質優先，不激進降級。
+
 ## 派工規則
 
 | 任務類型 | 委派順序 |
