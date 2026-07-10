@@ -17,5 +17,8 @@
       "Bash(git log:*)",
       "Bash(git show:*)"
     ]
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   }
 }
